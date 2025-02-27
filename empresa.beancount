@@ -1,0 +1,90 @@
+option "title" "Empresa A"
+option "name_assets" "Ativo"
+option "name_liabilities" "Passivo"
+option "name_equity" "Capital"
+option "name_income" "Rendimentos"
+option "name_expenses" "Gastos"
+option "operating_currency" "EUR"
+
+;;; Comoditties
+2002/01/01 commodity EUR
+  export: "EUR"
+2025/01/01 commodity GELADO
+  export: "GELADOO"
+  name:"Gelados genérico"
+2025/01/01 commodity BEBIDA_A
+  export: "BEBIDAA"
+  name:"Bebida A"
+
+;;; Contas
+2025/01/01 open Capital:51CapitalSubscrito EUR
+2025/01/01 open Ativo:12DepósitosÀordem EUR
+2025/01/01 open Ativo:11Caixa EUR
+2025/01/01 open Ativo:31Compras:311Mercadorias:3111BebidaA EUR
+2025/01/01 open Ativo:31Compras:311Mercadorias:3112Gelado EUR
+2025/01/01 open Ativo:31Compras:318DescontosAbatimentos EUR
+2025/01/01 open Ativo:32Mercadorias:321Armazém:3211BebidaA EUR
+2025/01/01 open Ativo:32Mercadorias:321Armazém:3212Gelado EUR
+2025/01/01 open Passivo:22Fornecedores:221FornecedoresCC  EUR
+2025/01/01 open Gastos:61CustoDasMercadoriasVendidas:611Mercadorias EUR
+2025/01/01 open Rendimentos:71Vendas:711Mercadorias:7111Gelados EUR
+2025/01/01 open Rendimentos:78OutrosRendimentos:782DescontosPP EUR
+
+;;; Prices
+2025/01/01 price GELADO                                             6 EUR
+2025/01/01 price BEBIDA_A                                           5 EUR
+
+;;; Operações
+2025/01/01 *  "Capital"
+    Ativo:12DepósitosÀordem                                  50000 EUR
+    Capital:51CapitalSubscrito
+
+; Compra de mercadorias: 100 unidades da bebidas a 3€ cada, A PRAZO
+2025/02/10 * "Compra de bebida A a prazo"
+  Ativo:31Compras:311Mercadorias:3111BebidaA                      300 EUR  
+  Passivo:22Fornecedores:221FornecedoresCC                      
+ 
+; Transferência para o armazém das 100 bebida A preço de custo 3€ (300 €)
+2025/02/10 * "transferência para armazém"
+    Ativo:32Mercadorias:321Armazém:3211BebidaA              300 EUR
+    Ativo:31Compras:311Mercadorias:3111BebidaA
+
+; Compra de 100 gealados a 2€/cada, a prazo a prazo
+2025/02/11 * "Compra de mercadoria"
+  Ativo:31Compras:311Mercadorias:3112Gelado                       200 EUR
+  Passivo:22Fornecedores:221FornecedoresCC                      
+
+2025/02/11 * "transferência para o armazém"
+  Ativo:32Mercadorias:321Armazém:3212Gelado                        200 EUR
+  Ativo:31Compras:311Mercadorias:3112Gelado                       
+
+2025/02/11 * "Devolução de 5 gelados estragados"
+  Passivo:22Fornecedores:221FornecedoresCC                         10 EUR
+  Ativo:31Compras:318DescontosAbatimentos
+  
+2025/02/11 * "Anulação de 5 que custaram 2€ gelados do armazém"  
+  Ativo:31Compras:318DescontosAbatimentos                          10 EUR
+  Ativo:32Mercadorias:321Armazém:3212Gelado
+
+2025/02/13 * "Pagamento aos fornecedores de Gelados e Bebida A"
+  Passivo:22Fornecedores:221FornecedoresCC                         490 EUR
+  Ativo:12DepósitosÀordem
+
+2025/02/17 *  "Venda de 3 gelados a 5€" 
+   Ativo:11Caixa                                                   15 EUR
+   Rendimentos:71Vendas:711Mercadorias:7111Gelados                -15 EUR
+   Gastos:61CustoDasMercadoriasVendidas:611Mercadorias              6 EUR
+   Ativo:32Mercadorias:321Armazém:3212Gelado                       -6 EUR
+
+; Compra Bebida A: 50 unidades a 1,5 cada; a pronto pagamento (8 dias) 
+; pagamento por transferência bancária.
+; Desconto de pronto pagamento de 5€
+
+2025/02/17 * "Compra de bebida A a pronto pagamento"
+  Ativo:31Compras:311Mercadorias:3111BebidaA   75 EUR
+  Ativo:12DepósitosÀordem                     -70 EUR
+  Rendimentos:78OutrosRendimentos:782DescontosPP -5 EUR
+
+2025/02/17 * "Colocar a bebida A em armazém"
+  Ativo:32Mercadorias:321Armazém:3211BebidaA 75 EUR
+  Ativo:31Compras:311Mercadorias:3111BebidaA
